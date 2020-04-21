@@ -57,6 +57,8 @@
     Some Additions were made, see the struct MT
 */
 
+#include "luaconf.h"
+
 #define NN 312
 #define MM 156
 #define MATRIX_A 0xB5026F5AA96619E9ULL
@@ -72,7 +74,7 @@ typedef struct {
 #define mti	(o->i)
 
 /* initializes mt[NN] with a seed */
-void init_genrand64(MT *o, unsigned long long seed)
+void init_genrand64(MT *o, lua_Integer seed)
 {
     mt[0] = seed;
     for (mti=1; mti<NN; mti++)
@@ -118,25 +120,28 @@ unsigned long long genrand64_int64(MT *o)
 }
 
 /* generates a random number on [0, 2^63-1]-interval */
-unsigned long long genrand64_int63(MT *o)
+lua_Integer genrand64_int63(MT *o)
 {
-    return genrand64_int64(o) >> 1;
+    return (lua_Integer)(genrand64_int64(o) >> 1);
 }
 
 /* generates a random number on [0,1]-real-interval */
-double genrand64_real1(MT *o)
+lua_Number genrand64_real1(MT *o)
 {
     return (genrand64_int64(o) >> 11) * (1.0/9007199254740991.0);
 }
 
 /* generates a random number on [0,1)-real-interval */
-double genrand64_real2(MT *o)
+lua_Number genrand64_real2(MT *o)
 {
     return (genrand64_int64(o) >> 11) * (1.0/9007199254740992.0);
 }
 
 /* generates a random number on (0,1)-real-interval */
-double genrand64_real3(MT *o)
+lua_Number genrand64_real3(MT *o)
 {
     return ((genrand64_int64(o) >> 12) + 0.5) * (1.0/4503599627370496.0);
 }
+
+
+
