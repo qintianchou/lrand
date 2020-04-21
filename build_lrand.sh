@@ -1,0 +1,1 @@
+gcc -shared -o lrand.dll mt19937-64.c lrand.c -Ilua-5.3.5/src -Llua-5.3.5/src -llua

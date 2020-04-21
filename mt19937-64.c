@@ -57,21 +57,9 @@
     Some Additions were made, see the struct MT
 */
 
-#include "luaconf.h"
+#include "lua.h"
 
-#define NN 312
-#define MM 156
-#define MATRIX_A 0xB5026F5AA96619E9ULL
-#define UM 0xFFFFFFFF80000000ULL /* Most significant 33 bits */
-#define LM 0x7FFFFFFFULL /* Least significant 31 bits */
-
-typedef struct {
-    unsigned long long v[NN];
-    int i;
-} MT;
-
-#define mt	(o->v)
-#define mti	(o->i)
+#include "mt19937-64.h"
 
 /* initializes mt[NN] with a seed */
 void init_genrand64(MT *o, lua_Integer seed)

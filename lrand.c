@@ -8,7 +8,7 @@
 #define MYTYPE MYNAME "_state"
 #define SEED 1794ULL
 
-#include "mt19937-64.c"
+#include "mt19937-64.h"
 
 static MT *Pget(lua_State *L, int i) {
     return luaL_checkudata(L, i, MYTYPE);
