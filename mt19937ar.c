@@ -43,18 +43,10 @@
 
 #include <stdio.h>
 
-/* Period parameters */  
-#define N 624
-#define M 397
-#define MATRIX_A 0x9908b0dfUL   /* constant vector a */
-#define UPPER_MASK 0x80000000UL /* most significant w-r bits */
-#define LOWER_MASK 0x7fffffffUL /* least significant r bits */
-
-static unsigned long mt[N]; /* the array for the state vector  */
-static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
+#include "mt19937ar.h"
 
 /* initializes mt[N] with a seed */
-void init_genrand(unsigned long s)
+void init_genrand(MT *o, unsigned long s)
 {
     mt[0]= s & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
@@ -73,10 +65,10 @@ void init_genrand(unsigned long s)
 /* init_key is the array for initializing keys */
 /* key_length is its length */
 /* slight change for C++, 2004/2/26 */
-void init_by_array(unsigned long init_key[], int key_length)
+void init_by_array(MT *o, unsigned long init_key[], int key_length)
 {
     int i, j, k;
-    init_genrand(19650218UL);
+    init_genrand(o, 19650218UL);
     i=1; j=0;
     k = (N>key_length ? N : key_length);
     for (; k; k--) {
@@ -99,7 +91,7 @@ void init_by_array(unsigned long init_key[], int key_length)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-unsigned long genrand_int32(void)
+unsigned long genrand_int32(MT *o)
 {
     unsigned long y;
     static unsigned long mag01[2]={0x0UL, MATRIX_A};
@@ -109,7 +101,7 @@ unsigned long genrand_int32(void)
         int kk;
 
         if (mti == N+1)   /* if init_genrand() has not been called, */
-            init_genrand(5489UL); /* a default initial seed is used */
+            init_genrand(o, 5489UL); /* a default initial seed is used */
 
         for (kk=0;kk<N-M;kk++) {
             y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
@@ -137,53 +129,67 @@ unsigned long genrand_int32(void)
 }
 
 /* generates a random number on [0,0x7fffffff]-interval */
-long genrand_int31(void)
+long genrand_int31(MT *o)
 {
-    return (long)(genrand_int32()>>1);
+    return (long)(genrand_int32(o)>>1);
 }
 
 /* generates a random number on [0,1]-real-interval */
-double genrand_real1(void)
+double genrand_real1(MT *o)
 {
-    return genrand_int32()*(1.0/4294967295.0); 
+    return genrand_int32(o)*(1.0/4294967295.0); 
     /* divided by 2^32-1 */ 
 }
 
 /* generates a random number on [0,1)-real-interval */
-double genrand_real2(void)
+double genrand_real2(MT *o)
 {
-    return genrand_int32()*(1.0/4294967296.0); 
+    return genrand_int32(o)*(1.0/4294967296.0); 
     /* divided by 2^32 */
 }
 
 /* generates a random number on (0,1)-real-interval */
-double genrand_real3(void)
+double genrand_real3(MT *o)
 {
-    return (((double)genrand_int32()) + 0.5)*(1.0/4294967296.0); 
+    return (((double)genrand_int32(o)) + 0.5)*(1.0/4294967296.0); 
     /* divided by 2^32 */
 }
 
 /* generates a random number on [0,1) with 53-bit resolution*/
-double genrand_res53(void) 
+double genrand_res53(MT *o) 
 { 
-    unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6; 
+    unsigned long a=genrand_int32(o)>>5, b=genrand_int32(o)>>6; 
     return(a*67108864.0+b)*(1.0/9007199254740992.0); 
 } 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
 
 int main(void)
 {
+    MT o;
     int i;
-    unsigned long init[4]={0x123, 0x234, 0x345, 0x456}, length=4;
-    init_by_array(init, length);
+    init_genrand(&o, 1);
     printf("1000 outputs of genrand_int32()\n");
     for (i=0; i<1000; i++) {
-      printf("%10lu ", genrand_int32());
+      printf("%10lu ", genrand_int32(&o));
+      if (i%5==4) printf("\n");
+    }
+    return 0;
+}
+
+int main(void)
+{
+    MT o;
+    int i;
+    unsigned long init[4]={0x123, 0x234, 0x345, 0x456}, length=4;
+    init_by_array(&o, init, length);
+    printf("1000 outputs of genrand_int32()\n");
+    for (i=0; i<1000; i++) {
+      printf("%10lu ", genrand_int32(&o));
       if (i%5==4) printf("\n");
     }
     printf("\n1000 outputs of genrand_real2()\n");
     for (i=0; i<1000; i++) {
-      printf("%10.8f ", genrand_real2());
+      printf("%10.8f ", genrand_real2(&o));
       if (i%5==4) printf("\n");
     }
     return 0;

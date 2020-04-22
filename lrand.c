@@ -21,8 +21,40 @@ static MT *Pnew(lua_State *L) {
     return c;
 }
 
+static void stackDump(lua_State *L, char *s)
+{
+    printf("-----------------------------------------%s-stack: ", s);
+
+    int i;
+    int top = lua_gettop(L);
+    for(i = 1; i <= top; i++)
+    {
+        int t = lua_type(L, i);
+        switch (t)
+        {
+        case LUA_TSTRING:
+            printf("'%s'", lua_tostring(L, i));
+            break;
+        case LUA_TBOOLEAN:
+            printf(lua_toboolean(L, i) ? "true" : "false");
+            break;
+        case LUA_TNUMBER:
+            printf("%g", lua_tonumber(L, i));
+            break;
+
+        default:
+            printf("%s", lua_typename(L, t));
+            break;
+        }
+
+        printf(", ");
+    }
+    printf("\n");
+}
+
 //new([seed])
 static int Lnew(lua_State *L) {
+    stackDump(L, "new");
     lua_Integer seed = luaL_optinteger(L, 1, SEED);
     MT *c = Pnew(L);
     init_genrand64(c, seed);
@@ -31,6 +63,7 @@ static int Lnew(lua_State *L) {
 
 //clone(c)
 static int Lclone(lua_State *L) {
+    stackDump(L, "clone");
     MT *c=Pget(L,1);
     MT *d=Pnew(L);
     *d=*c;
@@ -38,6 +71,7 @@ static int Lclone(lua_State *L) {
 }
 
 static int Lseed(lua_State *L) {
+    stackDump(L, "seed");
     MT *c = Pget(L,1);
     init_genrand64(c,luaL_optinteger(L,2,SEED));
     lua_settop(L,1);
